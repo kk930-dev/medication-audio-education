@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="theme-color" content="#f3f7fa">
+  <link rel="icon" href="data:,">
+  <title>信必可都保使用指导视频</title>
+  <style>
+    :root{color-scheme:light;font-family:-apple-system,BlinkMacSystemFont,"PingFang SC","Microsoft YaHei",sans-serif;color:#173047;background:#f3f7fa}
+    *{box-sizing:border-box}
+    body{margin:0;padding:24px 16px max(24px,env(safe-area-inset-bottom))}
+    main{max-width:820px;margin:12px auto;padding:28px;background:#fff;border:1px solid #dfe8ef;border-radius:20px;box-shadow:0 8px 30px rgb(32 51 79 / 6%)}
+    .eyebrow{font-size:1rem;color:#52718e;font-weight:700}
+    h1{margin:12px 0 20px;font-size:clamp(1.625rem,6.5vw,2.125rem);line-height:1.4}
+    .intro{font-size:1.125rem;color:#526b80;line-height:1.8;margin:10px 0 18px}
+    .player{overflow:hidden;border-radius:12px;background:#10232f}
+    video{display:block;width:100%;aspect-ratio:888/502;max-height:72vh;background:#10232f}
+    .controls{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:18px 0 12px}
+    button{min-height:56px;padding:12px 16px;border:0;border-radius:12px;font:inherit;font-size:1.1875rem;font-weight:700;cursor:pointer;touch-action:manipulation}
+    button:focus-visible,a:focus-visible{outline:3px solid #e9b341;outline-offset:3px}
+    .primary{color:#fff;background:#176d91}
+    .secondary{color:#254d66;background:#edf3f7}
+    .status{min-height:1.8em;font-size:1.0625rem;line-height:1.8;color:#385a70;margin:10px 0 16px}
+    .fallback{font-size:1.0625rem;line-height:1.8;margin:0 0 22px}
+    .fallback a{color:#176d91;text-underline-offset:3px}
+    .notice{margin:0;padding:14px 16px;border-left:4px solid #78a88b;background:#f2f8f4;color:#365a45;font-size:1rem;line-height:1.8}
+    @media(max-width:560px){body{padding:12px}main{margin:8px auto;padding:22px 16px}.controls{gap:10px}button{font-size:1.125rem}}
+  </style>
+</head>
+<body>
+  <main>
+    <div class="eyebrow">患者用药指导 · 视频</div>
+    <h1>信必可都保<br>使用指导视频</h1>
+    <p class="intro"><strong>布地奈德福莫特罗粉吸入剂</strong>是由布地奈德和福莫特罗组成的复方吸入制剂。适用于哮喘、慢阻肺等慢性呼吸道疾病的维持期和缓解期的治疗，以及医生认为需要使用该药物的其他呼吸道疾病患者。是否按需使用仍取决于具体规格和医生处方。</p>
+    <div class="player">
+      <video id="video" controls playsinline webkit-playsinline preload="metadata" aria-label="信必可都保使用指导视频">
+        <source src="symbicort-turbuhaler.mp4?v=20261127-hq-v1" type="video/mp4">
+        当前浏览器不支持页面内播放，请使用下方“单独打开视频”链接。
+      </video>
+    </div>
+    <div class="controls" aria-label="视频播放控制">
+      <button id="play" class="primary" type="button">播放视频</button>
+      <button id="replay" class="secondary" type="button">重新播放</button>
+    </div>
+    <p id="status" class="status" role="status" aria-live="polite">准备就绪，请点击“播放视频”。</p>
+    <p class="fallback">若页面内无法播放，可<a href="symbicort-turbuhaler.mp4?v=20261127-hq-v1" target="_blank" rel="noopener">单独打开视频</a>。</p>
+    <p class="notice">本视频供用药指导，具体用药请遵医嘱；使用中有疑问，请咨询医生或药师。</p>
+  </main>
+  <script>
+    const video=document.getElementById('video');
+    const play=document.getElementById('play');
+    const replay=document.getElementById('replay');
+    const status=document.getElementById('status');
+    function playbackError(){
+      const messages={1:'播放已中止，请点击“重新播放”重试。',2:'视频暂时无法加载，请检查网络后重试，或使用下方“单独打开视频”链接。',3:'视频无法解码，请使用下方“单独打开视频”链接，或在手机浏览器中打开本页。',4:'当前浏览器不支持此视频，请使用下方“单独打开视频”链接。'};
+      status.textContent=messages[video.error?.code]||'暂时无法播放，请检查网络后重试，或使用下方“单独打开视频”链接。';
+      play.textContent='播放视频';
+    }
+    async function start(fromBeginning=false){
+      try{if(fromBeginning)video.currentTime=0;status.textContent='正在加载视频，请稍候……';await video.play()}
+      catch(error){if(error.name==='NotAllowedError')status.textContent='请再次点击播放，或直接点击视频画面上的播放按钮。';else if(error.name!=='AbortError')playbackError()}
+    }
+    play.addEventListener('click',()=>{if(video.paused||video.ended)start();else video.pause()});
+    replay.addEventListener('click',()=>start(true));
+    video.addEventListener('playing',()=>{play.textContent='暂停视频';status.textContent='正在播放，可用视频控件调整进度和音量。'});
+    video.addEventListener('pause',()=>{play.textContent='继续播放';if(!video.ended)status.textContent='已暂停，点击“继续播放”可接着观看。'});
+    video.addEventListener('waiting',()=>{if(!video.paused)status.textContent='正在缓冲，请稍候……'});
+    video.addEventListener('ended',()=>{play.textContent='播放视频';status.textContent='视频已播放完毕，可点击“重新播放”再次观看。'});
+    video.addEventListener('error',playbackError);
+  </script>
+</body>
+</html>
